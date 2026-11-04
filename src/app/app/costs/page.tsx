@@ -105,10 +105,12 @@ function CostsInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Portfo
                   );
                 }}
               />
-              <Bar dataKey="base" stackId="a" fill="var(--s1)" stroke="var(--surface)" strokeWidth={2} isAnimationActive={false} radius={regular.length ? 0 : [4, 4, 0, 0]} />
+              <Bar dataKey="base" stackId="a" fill="var(--s1)" stroke="var(--surface)" strokeWidth={2} isAnimationActive={false} radius={regular.length ? 0 : [4, 4, 0, 0]}>
+                {regular.length === 0 && <LabelList dataKey="total" position="top" formatter={(v) => inrShort(Number(v)).replace(" ", "")} style={{ fontSize: 12, fontWeight: 700, fill: "var(--ink)" }} />}
+              </Bar>
               {regular.length > 0 && (
                 <Bar dataKey="extra" stackId="a" fill="var(--s2)" stroke="var(--surface)" strokeWidth={2} radius={[4, 4, 0, 0]} isAnimationActive={false}>
-                  <LabelList dataKey="total" position="top" formatter={(v) => inrShort(Number(v))} style={{ fontSize: 12, fontWeight: 700, fill: "var(--ink)" }} />
+                  <LabelList dataKey="total" position="top" formatter={(v) => inrShort(Number(v)).replace(" ", "")} style={{ fontSize: 12, fontWeight: 700, fill: "var(--ink)" }} />
                 </Bar>
               )}
             </BarChart>
@@ -156,25 +158,25 @@ function CostsInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Portfo
       <section className="card overflow-hidden">
         <h2 className="p-4 pb-2 font-display text-lg font-bold sm:px-6">Fee per fund</h2>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] text-sm">
+          <table className="w-full text-sm">
             <thead className="text-left text-xs text-ink-3">
               <tr className="border-b border-line">
                 <th className="px-4 py-2 font-medium sm:px-6">Fund</th>
                 <th className="py-2 text-right font-medium"><Term id="expense-ratio">TER</Term></th>
-                <th className="py-2 text-right font-medium">Per year</th>
-                <th className="px-4 py-2 text-right font-medium sm:px-6">10-yr drag*</th>
+                <th className="py-2 pl-2 text-right font-medium">Per year</th>
+                <th className="hidden px-4 py-2 text-right font-medium sm:table-cell sm:px-6">10-yr drag*</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((r) => (
                 <tr key={r.holding.id}>
-                  <td className="px-4 py-2.5 sm:px-6">
-                    <div className="font-medium">{r.holding.shortName}</div>
+                  <td className="max-w-0 px-4 py-2.5 sm:px-6">
+                    <div className="truncate font-medium">{r.holding.shortName}</div>
                     <div className="text-xs text-ink-3">{r.holding.plan} · {r.holding.category}</div>
                   </td>
-                  <td className="num py-2.5 text-right">{r.ter == null ? "—" : `${r.ter.toFixed(2)}%`}{r.holding.ter.source === "estimate" && <span className="text-ink-3"> est</span>}</td>
-                  <td className="num py-2.5 text-right">{inr(r.annualCost)}</td>
-                  <td className="num px-4 py-2.5 text-right sm:px-6">{inrShort(r.drag[10])}</td>
+                  <td className="num whitespace-nowrap py-2.5 pl-2 text-right">{r.ter == null ? "—" : `${r.ter.toFixed(2)}%`}{r.holding.ter.source === "estimate" && <span className="text-ink-3"> est</span>}</td>
+                  <td className="num py-2.5 pl-2 pr-4 text-right sm:pr-0">{inr(r.annualCost)}</td>
+                  <td className="num hidden px-4 py-2.5 text-right sm:table-cell sm:px-6">{inrShort(r.drag[10])}</td>
                 </tr>
               ))}
             </tbody>

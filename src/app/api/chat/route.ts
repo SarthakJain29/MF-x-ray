@@ -4,7 +4,7 @@
  */
 import { containsPII, scrubText, type AiContext } from "@/lib/ai/anonymize";
 import { SYSTEM_PROMPT, userPrompt } from "@/lib/ai/prompt";
-import { providerFromEnv, type ChatMessage } from "@/lib/ai/providers";
+import { providersFromEnv, type ChatMessage } from "@/lib/ai/providers";
 
 export const dynamic = "force-dynamic";
 
@@ -15,13 +15,13 @@ interface Body {
 }
 
 export async function GET() {
-  const p = providerFromEnv();
-  return Response.json({ mode: p ? "ai" : "local", provider: p?.name ?? null });
+  const list = providersFromEnv();
+  return Response.json({ mode: list.length ? "ai" : "local", providers: list.map((p) => p.name) });
 }
 
 export async function POST(req: Request) {
-  const provider = providerFromEnv();
-  if (!provider) return Response.json({ error: "no-provider" }, { status: 503 });
+  const providers = providersFromEnv();
+  if (!providers.length) return Response.json({ error: "no-provider" }, { status: 503 });
 
   let body: Body;
   try {
@@ -42,14 +42,18 @@ export async function POST(req: Request) {
     .filter((m) => m && (m.role === "user" || m.role === "assistant"))
     .map((m) => ({ role: m.role, content: scrubText(String(m.content)).slice(0, 1500) }));
 
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 20_000);
-  try {
-    const answer = await provider.complete(SYSTEM_PROMPT, [...history, { role: "user", content: userPrompt(question, body.context) }], ctrl.signal);
-    return Response.json({ answer, provider: provider.name });
-  } catch {
-    return Response.json({ error: "provider-failed" }, { status: 502 });
-  } finally {
-    clearTimeout(timer);
+  const messages = [...history, { role: "user" as const, content: userPrompt(question, body.context) }];
+  for (const provider of providers) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20_000);
+    try {
+      const answer = await provider.complete(SYSTEM_PROMPT, messages, ctrl.signal);
+      return Response.json({ answer, provider: provider.name });
+    } catch {
+      // try the next provider
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  return Response.json({ error: "provider-failed" }, { status: 502 });
 }

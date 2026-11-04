@@ -54,16 +54,23 @@ function groq(key: string, model: string): LlmProvider {
   };
 }
 
-/** Picks a provider from env: LLM_PROVIDER=gemini|groq, else whichever key is set. Null = mock mode. */
-export function providerFromEnv(env: Record<string, string | undefined> = process.env): LlmProvider | null {
-  const pref = env.LLM_PROVIDER?.toLowerCase();
+/**
+ * Providers configured via env, in preference order (LLM_PROVIDER first, then whichever keys exist).
+ * The chat route tries them in order, so a quota error on one falls through to the next. Empty = mock mode.
+ */
+export function providersFromEnv(env: Record<string, string | undefined> = process.env): LlmProvider[] {
   const g = env.GEMINI_API_KEY;
   const q = env.GROQ_API_KEY;
-  const gm = env.GEMINI_MODEL || "gemini-2.5-flash";
-  const qm = env.GROQ_MODEL || "llama-3.3-70b-versatile";
-  if (pref === "groq" && q) return groq(q, qm);
-  if (pref === "gemini" && g) return gemini(g, gm);
-  if (g) return gemini(g, gm);
-  if (q) return groq(q, qm);
-  return null;
+  const gm = env.GEMINI_MODEL || "gemini-flash-lite-latest";
+  const qm = env.GROQ_MODEL || "openai/gpt-oss-120b";
+  const list: LlmProvider[] = [];
+  if (g) list.push(gemini(g, gm));
+  if (q) list.push(groq(q, qm));
+  const pref = env.LLM_PROVIDER?.toLowerCase();
+  if (pref) list.sort((a, b) => (a.name === pref ? -1 : b.name === pref ? 1 : 0));
+  return list;
+}
+
+export function providerFromEnv(env: Record<string, string | undefined> = process.env): LlmProvider | null {
+  return providersFromEnv(env)[0] ?? null;
 }

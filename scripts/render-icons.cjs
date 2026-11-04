@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Renders PNG app icons from SVG using the pre-installed Playwright Chromium. Usage: node scripts/render-icons.cjs
 const { chromium } = require("playwright");
 const path = require("node:path");
