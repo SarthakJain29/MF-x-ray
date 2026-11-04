@@ -64,7 +64,7 @@ export function NavChart({ series, txns }: { series: NavSeries; txns: Transactio
           <Scatter
             dataKey="buy"
             isAnimationActive={false}
-            shape={(pr: { cx?: number; cy?: number }) => (pr.cx == null || pr.cy == null ? <g /> : <circle cx={pr.cx} cy={pr.cy} r={dense ? 2.5 : 5} fill="var(--s3)" fillOpacity={dense ? 0.75 : 1} stroke={dense ? "none" : "var(--surface)"} strokeWidth={2} />)}
+            shape={(pr: { cx?: number; cy?: number }) => (pr.cx == null || pr.cy == null ? <g /> : <circle cx={pr.cx} cy={pr.cy} r={dense ? 2 : 5} fill="var(--s3)" fillOpacity={dense ? 0.55 : 1} stroke={dense ? "none" : "var(--surface)"} strokeWidth={2} />)}
           />
           <Scatter
             dataKey="sell"
