@@ -60,9 +60,17 @@ export function NavChart({ series, txns }: { series: NavSeries; txns: Transactio
               );
             }}
           />
-          <Line type="monotone" dataKey="nav" stroke="var(--s7)" strokeWidth={2} dot={false} isAnimationActive={false} />
-          <Scatter dataKey="buy" fill="var(--s3)" stroke="var(--surface)" strokeWidth={2} shape="circle" isAnimationActive={false} r={dense ? 3 : 5} />
-          <Scatter dataKey="sell" fill="var(--surface)" stroke="var(--s2)" strokeWidth={2.5} shape="circle" isAnimationActive={false} />
+          <Line type="monotone" dataKey="nav" stroke="var(--s7)" strokeWidth={2} dot={false} activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} isAnimationActive={false} />
+          <Scatter
+            dataKey="buy"
+            isAnimationActive={false}
+            shape={(pr: { cx?: number; cy?: number }) => (pr.cx == null || pr.cy == null ? <g /> : <circle cx={pr.cx} cy={pr.cy} r={dense ? 2.5 : 5} fill="var(--s3)" fillOpacity={dense ? 0.75 : 1} stroke={dense ? "none" : "var(--surface)"} strokeWidth={2} />)}
+          />
+          <Scatter
+            dataKey="sell"
+            isAnimationActive={false}
+            shape={(pr: { cx?: number; cy?: number }) => (pr.cx == null || pr.cy == null ? <g /> : <circle cx={pr.cx} cy={pr.cy} r={5} fill="var(--surface)" stroke="var(--s2)" strokeWidth={2.5} />)}
+          />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
