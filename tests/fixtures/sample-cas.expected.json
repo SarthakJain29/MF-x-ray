@@ -1,0 +1,89 @@
+{
+  "password": "mfxray",
+  "from": "2019-01-01",
+  "to": "2026-10-31",
+  "investorName": "Ananya Rao",
+  "folios": 7,
+  "schemes": [
+    {
+      "isin": "INF879O01027",
+      "name": "Parag Parikh Flexi Cap Fund - Direct Plan - Growth",
+      "amc": "PPFAS Mutual Fund",
+      "close": 20375.72,
+      "nav": 89.2332,
+      "navDate": "2026-10-30",
+      "value": 1818190.7,
+      "txnCount": 171
+    },
+    {
+      "isin": "INF179K01608",
+      "name": "HDFC Flexi Cap Fund - Regular Plan - Growth Option",
+      "amc": "HDFC Mutual Fund",
+      "close": 591.178,
+      "nav": 1984.497,
+      "navDate": "2026-10-30",
+      "value": 1173190.97,
+      "txnCount": 168
+    },
+    {
+      "isin": "INF179K01XD8",
+      "name": "HDFC Corporate Bond Fund - Direct Plan - Growth Option",
+      "amc": "HDFC Mutual Fund",
+      "close": 6255.32,
+      "nav": 34.9313,
+      "navDate": "2026-10-30",
+      "value": 218506.46,
+      "txnCount": 3
+    },
+    {
+      "isin": "INF769K01AX2",
+      "name": "Mirae Asset Large Cap Fund - Direct Plan - Growth",
+      "amc": "Mirae Asset Mutual Fund",
+      "close": 3282.789,
+      "nav": 121.46,
+      "navDate": "2026-10-30",
+      "value": 398727.55,
+      "txnCount": 109
+    },
+    {
+      "isin": "INF789F01XA0",
+      "name": "UTI Nifty 50 Index Fund - Direct Plan - Growth",
+      "amc": "UTI Mutual Fund",
+      "close": 3868.775,
+      "nav": 162.3751,
+      "navDate": "2026-10-30",
+      "value": 628192.73,
+      "txnCount": 140
+    },
+    {
+      "isin": "INF846K01131",
+      "name": "Axis ELSS Tax Saver Fund - Regular Plan - Growth",
+      "amc": "Axis Mutual Fund",
+      "close": 3047.31,
+      "nav": 93.7131,
+      "navDate": "2026-10-30",
+      "value": 285572.87,
+      "txnCount": 8
+    },
+    {
+      "isin": "INF204K01K15",
+      "name": "Nippon India Small Cap Fund - Direct Plan - Growth Plan - Growth Option",
+      "amc": "Nippon India Mutual Fund",
+      "close": 3129.281,
+      "nav": 192.758,
+      "navDate": "2026-10-30",
+      "value": 603193.95,
+      "txnCount": 93
+    },
+    {
+      "isin": "INF109K01Q49",
+      "name": "ICICI Prudential Liquid Fund - Direct Plan - Growth",
+      "amc": "ICICI Prudential Mutual Fund",
+      "close": 0,
+      "nav": 423.3766,
+      "navDate": "2026-10-30",
+      "value": 0,
+      "txnCount": 3
+    }
+  ]
+}
