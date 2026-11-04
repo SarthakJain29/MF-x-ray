@@ -153,9 +153,10 @@ follow the entity, not its rank.
 - Benchmark reference card (same money in a Nifty 50 index fund, historical)
 - CI workflow (typecheck, lint, tests, build)
 - README with real screenshots; developer.md
+- PR opened: https://github.com/SarthakJain29/MF-x-ray/pull/1
 
 **In progress**
-- Refreshing `public/data/ter.json` with last month's AMFI data (some AMCs hadn't filed November yet)
+- Nothing in flight. `public/data/ter.json` holds Oct + Nov 2026 AMFI TERs (2,178 schemes); `schemes.json` is from 4 Nov 2026.
 
 **Next**
 - Automated AMC holdings ingestion (top AMCs' monthly Excel) to replace the snapshot
