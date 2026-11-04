@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "Upload your CAMS/KFintech CAS and see your true XIRR, fund overlap, hidden costs and goals — parsed privately in your browser.",
   applicationName: "MF X-ray",
   appleWebApp: { capable: true, title: "MF X-ray", statusBarStyle: "black-translucent" },
-  icons: { icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }, { url: "/icons/icon-192.png", sizes: "192x192" }], apple: "/icons/apple-touch-icon.png" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
