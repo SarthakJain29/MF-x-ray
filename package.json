@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "postinstall": "node scripts/copy-pdf-worker.mjs",
+    "predev": "node scripts/copy-pdf-worker.mjs",
+    "prebuild": "node scripts/copy-pdf-worker.mjs",
+    "data:schemes": "node scripts/build-scheme-index.mjs",
+    "data:ter": "node scripts/build-ter-index.mjs",
+    "sample:generate": "tsx scripts/generate-sample-cas.ts"
   },
   "dependencies": {
     "next": "^16.4.5",
@@ -29,5 +39,8 @@
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
