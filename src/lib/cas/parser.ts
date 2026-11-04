@@ -181,8 +181,13 @@ export function parseCASLines(lines: string[]): CASData {
   let afterEmail = 0;
   const addressLines: string[] = [];
 
+  const FUNDISH = /fund|plan|growth|idcw|dividend|etf|fof|scheme|option|bonus|ISIN\s*:|Registrar|RTA\s*:/i;
   const commitPending = () => {
     if (!pendingScheme || !folio) return;
+    if (!FUNDISH.test(pendingScheme.text)) {
+      pendingScheme = null; // a stray hyphenated line (footer etc.), not a scheme header
+      return;
+    }
     scheme = emptyScheme(pendingScheme.code, pendingScheme.text);
     folio.schemes.push(scheme);
     pendingScheme = null;
@@ -251,7 +256,7 @@ export function parseCASLines(lines: string[]): CASData {
       }
 
       const sm = RE.schemeStart.exec(flat);
-      if (sm && !RE.open.test(flat) && !RE.close.test(flat) && !/^(nominee|folio|pan)/i.test(flat)) {
+      if (sm && !RE.open.test(flat) && !RE.close.test(flat) && !/^(nominee|folio|pan|page)/i.test(flat) && (FUNDISH.test(flat) || !scheme)) {
         if (RE.registrar.test(flat)) {
           scheme = emptyScheme(sm[1], sm[2]);
           folio.schemes.push(scheme);

@@ -114,6 +114,13 @@ describe("text-only statements (no column tabs)", () => {
     expect(cas.warnings).toEqual([]);
   });
 
+  it("ignores stray hyphenated lines inside a folio", () => {
+    const noisy = [...lines.slice(0, 12), "CAMSONLINE-Toll free 1800 000 0000 (Mon-Sat)", ...lines.slice(12)];
+    const cas = parseCASLines(noisy);
+    expect(cas.folios[0].schemes).toHaveLength(1);
+    expect(cas.folios[0].schemes[0].transactions).toHaveLength(4);
+  });
+
   it("flags units that don't reconcile", () => {
     const broken = lines.map((l) => (l.startsWith("Closing") ? l.replace("606.414", "700.000") : l));
     expect(parseCASLines(broken).warnings[0]).toMatch(/don't reconcile/);

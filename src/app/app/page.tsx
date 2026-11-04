@@ -7,6 +7,7 @@ import { HealthCard } from "@/components/dashboard/HealthCard";
 import { FundList } from "@/components/dashboard/FundList";
 import { ValueChart } from "@/components/charts/ValueChart";
 import { Disclaimer } from "@/components/Disclaimer";
+import { RememberBanner } from "@/components/dashboard/RememberBanner";
 import { healthFacts, healthHeadline } from "@/lib/health";
 import { buildTimeline } from "@/lib/finance/timeline";
 import { useStore } from "@/store/store";
@@ -26,6 +27,7 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
   return (
     <div className="space-y-4">
       <HeroCard p={p} navStatus={navStatus} name={name} />
+      <RememberBanner />
       {p.warnings.length > 0 && (
         <details className="rounded-2xl bg-watch-soft px-4 py-3 text-sm text-watch">
           <summary className="cursor-pointer font-semibold">{p.warnings.length} note{p.warnings.length > 1 ? "s" : ""} about your statement</summary>
