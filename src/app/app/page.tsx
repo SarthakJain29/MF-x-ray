@@ -8,6 +8,7 @@ import { FundList } from "@/components/dashboard/FundList";
 import { ValueChart } from "@/components/charts/ValueChart";
 import { Disclaimer } from "@/components/Disclaimer";
 import { RememberBanner } from "@/components/dashboard/RememberBanner";
+import { BenchmarkCard } from "@/components/dashboard/BenchmarkCard";
 import { healthFacts, healthHeadline } from "@/lib/health";
 import { buildTimeline } from "@/lib/finance/timeline";
 import { useStore } from "@/store/store";
@@ -39,6 +40,7 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
         <HealthCard headline={healthHeadline(p)} facts={facts.slice(0, 4)} />
       </div>
       <AllocationCard p={p} />
+      <BenchmarkCard p={p} navs={navs} />
       <FundList holdings={p.holdings} total={p.value} />
       {facts.length > 4 && <HealthCard headline="More facts about your portfolio" facts={facts.slice(4)} />}
       {p.closed.length > 0 && (

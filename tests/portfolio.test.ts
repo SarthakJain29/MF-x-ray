@@ -120,3 +120,14 @@ describe("costs & goals", () => {
     expect(g.monthlyNeeded).toBeCloseTo(700000 / 60, 4);
   });
 });
+
+describe("benchmark replay", () => {
+  it("replays cash flows on a benchmark NAV series", async () => {
+    const { simulateBenchmark } = await import("@/lib/finance/benchmark");
+    const series = { dates: ["2020-01-01", "2021-01-01", "2022-01-01"], navs: [10, 11, 12.1] };
+    const r = simulateBenchmark([{ date: "2020-01-01", amount: -1000 }, { date: "2021-01-01", amount: -1100 }], series)!;
+    expect(r.value).toBeCloseTo(100 * 12.1 + 100 * 12.1, 6);
+    expect(r.xirr!).toBeCloseTo(0.1, 3); // 2020 is a leap year (Actual/365)
+    expect(simulateBenchmark([{ date: "2019-01-01", amount: -1 }], series)).toBeNull();
+  });
+});

@@ -8,6 +8,7 @@ import { navHistories } from "@/lib/data/nav";
 import type { NavSeries } from "@/lib/finance/costs";
 import { buildPortfolio, type LatestNav, type Portfolio } from "@/lib/finance/portfolio";
 import { overlapReport, type OverlapReport } from "@/lib/overlap";
+import { BENCHMARK } from "@/lib/finance/benchmark";
 
 export interface PortfolioState {
   ready: boolean;
@@ -45,6 +46,7 @@ export function usePortfolio(): PortfolioState {
   useEffect(() => {
     if (!base) return;
     const codes = [...base.holdings, ...base.closed].flatMap((h) => [h.amfiCode, h.directCode]).filter((c): c is number => c != null);
+    codes.push(BENCHMARK.code);
     const missing = codes.filter((c) => !navCache[c]);
     if (!missing.length) return;
     let alive = true;

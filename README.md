@@ -36,7 +36,7 @@ and optional AI chat receives only anonymous totals — never PAN, name, email o
 
 | | |
 |---|---|
-| **Portfolio dashboard** | Current value (marked to the latest NAV), FIFO cost, unrealised & realised gains, **true XIRR** overall and per fund, value-vs-invested chart, allocation by asset class / category / fund house |
+| **Portfolio dashboard** | Current value (marked to the latest NAV), FIFO cost, unrealised & realised gains, **true XIRR** overall and per fund, value-vs-invested chart, allocation by asset class / category / fund house, and a past-only reference: the same cash flows replayed on a Nifty 50 index fund |
 | **Fund overlap** | Pairwise overlap heat-map, common stocks per pair, look-through exposure (“you own ₹4.2 L of HDFC Bank across 6 funds”) |
 | **Cost check** | Real regular & direct TERs from AMFI, fee drag in rupees over 5/10/20 years at *your* assumption, regular-plan detection, and money already lost — computed by replaying your purchases on the direct plan's actual NAV history |
 | **Goal tracker** | Earmark funds (or a share of them) for goals; progress rings; monthly amount needed under a growth rate you choose |
@@ -57,7 +57,7 @@ the user picks, labelled as an assumption.
 - **pdf.js 5** for in-browser decryption & text extraction · custom CAS parser
 - **Recharts 3** with a CVD-validated categorical palette
 - **zustand** for state · hand-written service worker
-- **Vitest** — 37 tests covering CAS parsing (on the real sample PDF), XIRR, overlap, costs, goals, anonymisation
+- **Vitest** — 39 tests covering CAS parsing (on the real sample PDF), XIRR, overlap, costs, goals, anonymisation
 - Data: **mfapi.in** (NAV history), **AMFI** NAVAll (scheme master) and TER disclosures (expense ratios)
 - LLMs behind a tiny provider interface: **Gemini** (`GEMINI_API_KEY`) or **Groq** (`GROQ_API_KEY`), offline fallback
 
@@ -114,7 +114,6 @@ Deploying (Vercel free tier), regenerating the sample/data snapshots, decisions 
 - [ ] Automated monthly ingestion of AMC portfolio disclosures (replace the approximate holdings snapshot)
 - [ ] NSDL / CDSL depository CAS support
 - [ ] Capital-gains view (STCG/LTCG, grandfathering) — facts only
-- [ ] “Same money, index fund” historical comparison
 - [ ] Scheduled refresh of AMFI scheme & TER snapshots via GitHub Actions
 - [ ] Hindi and other Indian-language explainers
 

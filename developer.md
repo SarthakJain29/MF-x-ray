@@ -108,6 +108,7 @@ follow the entity, not its rank.
 - **Expense ratios**: real per-scheme regular/direct TERs from AMFI's public TER disclosure API, bundled as a snapshot. Category-median estimates are used only when a scheme is missing, and are labelled “est”.
 - **Fund holdings for overlap**: no free, common API exists for AMC monthly portfolio disclosures (each AMC publishes its own Excel/PDF in different formats). v1 ships a hand-compiled, **approximate top-holdings snapshot** for ~20 popular funds plus approximate NIFTY 50 / SENSEX / NIFTY NEXT 50 weights for index funds, clearly labelled in the UI as not live. Funds without data fall back to a same-category note. See Roadmap.
 - **Regular-plan money lost (past)**: replays the user's actual purchase dates/amounts on the direct plan's real NAV history (mfapi.in) and compares today's values; falls back to average balance × TER gap × years when history is unavailable (labelled estimate).
+- **Benchmark reference**: the dashboard replays the user's exact cash flows on UTI Nifty 50 Index Fund (direct) historical NAVs and shows value + XIRR side by side. Framed as a past-only yardstick, not a recommendation.
 - **Projections** (fee drag, goals) use a growth rate the **user chooses** (slider), always labelled “your assumption, not a prediction”. Goals default to 0%; the cost slider defaults to 10% (editable).
 - **Privacy**: parsed CAS lives in memory by default. “Remember on this device” (off by default) saves it to localStorage. “Delete my data” wipes localStorage + sessionStorage + memory. No analytics, no cookies.
 - **AI context** (`buildAiContext`) includes only fund names, categories, AMC names, rounded amounts, percentages, XIRR, TER. Never PAN, name, email, phone, address, folio, ISIN or transactions. User questions are scrubbed of PAN/email/phone/long numbers/investor name on the client and again on the server; the server rejects any context that still looks like it contains PII. Tests enforce this.
@@ -149,6 +150,8 @@ follow the entity, not its rank.
 - AI chat (Gemini/Groq with fallback, offline mode), anonymisation + PII tests, “see exactly what is sent”
 - Privacy page with Remember toggle + Delete my data; PWA manifest, icons, service worker
 - Light/dark themes, mobile bottom nav, desktop sidebar
+- Benchmark reference card (same money in a Nifty 50 index fund, historical)
+- CI workflow (typecheck, lint, tests, build)
 - README with real screenshots; developer.md
 
 **In progress**
@@ -157,6 +160,5 @@ follow the entity, not its rank.
 **Next**
 - Automated AMC holdings ingestion (top AMCs' monthly Excel) to replace the snapshot
 - NSDL/CDSL CAS support
-- Benchmark comparison (same cash flows into an index fund) — factual, past only
 - Capital-gains view (STCG/LTCG with grandfathering)
 - Scheduled GitHub Action to refresh `schemes.json` / `ter.json` monthly
