@@ -15,8 +15,9 @@ overlapping funds and goal progress — explained in plain language, computed en
   <img src="docs/screenshots/mobile-dashboard.png" width="23%" alt="Dashboard" />
   <img src="docs/screenshots/mobile-overlap.png" width="23%" alt="Fund overlap" />
   <img src="docs/screenshots/mobile-costs.png" width="23%" alt="Cost check" />
-  <img src="docs/screenshots/mobile-ask.png" width="23%" alt="Ask your portfolio" />
+  <img src="docs/screenshots/mobile-tax.png" width="23%" alt="Capital gains estimate" />
 </p>
+<p align="center"><img src="docs/screenshots/share-card.png" width="38%" alt="Shareable anonymised X-ray card" /></p>
 
 <p align="center"><img src="docs/screenshots/desktop-dashboard.png" width="92%" alt="Desktop dashboard, dark theme" /></p>
 
@@ -37,7 +38,10 @@ and optional AI chat receives only anonymous totals — never PAN, name, email o
 | | |
 |---|---|
 | **Portfolio dashboard** | Current value (marked to the latest NAV), FIFO cost, unrealised & realised gains, **true XIRR** overall and per fund, value-vs-invested chart, allocation by asset class / category / fund house, and a past-only reference: the same cash flows replayed on a Nifty 50 index fund |
-| **Fund overlap** | Pairwise overlap heat-map, common stocks per pair, look-through exposure (“you own ₹4.2 L of HDFC Bank across 6 funds”) |
+| **Fund overlap** | Built on **real month-end portfolios** from fund-house disclosures (395 schemes, 9 AMCs, matched by ISIN): “these 2 funds are 51% the same”, heat-map, your real top 10 stocks and sector exposure across all funds, with the data month and source shown for every fund |
+| **Capital gains estimate** | FIFO-based realised and unrealised STCG/LTCG per fund under current Indian MF tax rules (equity vs debt, ₹1.25 L exemption, grandfathering), clearly labelled as an estimate, not tax advice |
+| **Share card** | An anonymised image of your X-ray — percentages only unless you opt in to amounts |
+| **Robust parsing** | Handles switches, STP/SWP, IDCW, mergers, segregated portfolios, multiple folios/PANs; a “didn't parse right?” flow creates a redacted diagnostic you choose whether to share |
 | **Cost check** | Real regular & direct TERs from AMFI, fee drag in rupees over 5/10/20 years at *your* assumption, regular-plan detection, and money already lost — computed by replaying your purchases on the direct plan's actual NAV history |
 | **Goal tracker** | Earmark funds (or a share of them) for goals; progress rings; monthly amount needed under a growth rate you choose |
 | **Beginner layer** | Every term is tappable for a plain-language explainer; a “portfolio health” summary of facts; 2-minute learn cards; searchable glossary |
@@ -57,8 +61,9 @@ the user picks, labelled as an assumption.
 - **pdf.js 5** for in-browser decryption & text extraction · custom CAS parser
 - **Recharts 3** with a CVD-validated categorical palette
 - **zustand** for state · hand-written service worker
-- **Vitest** — 39 tests covering CAS parsing (on the real sample PDF), XIRR, overlap, costs, goals, anonymisation
-- Data: **mfapi.in** (NAV history), **AMFI** NAVAll (scheme master) and TER disclosures (expense ratios)
+- **Vitest** — 99 tests covering CAS parsing (sample PDF + edge-case fixtures), XIRR, FIFO lots, capital gains, AMC disclosure parsing, overlap, redaction, anonymisation
+- **SheetJS + Playwright** (data scripts only) for the monthly AMC disclosure ingestion
+- Data: **mfapi.in** (NAV history), **AMFI** NAVAll (scheme master) and TER disclosures (expense ratios), **AMC monthly portfolio disclosures** (holdings)
 - LLMs behind a tiny provider interface: **Gemini** (`GEMINI_API_KEY`) or **Groq** (`GROQ_API_KEY`), offline fallback
 
 ## Architecture
@@ -72,7 +77,7 @@ flowchart LR
     Parser --> Engine["buildPortfolio()<br/>FIFO cost · XIRR · allocation"]
     Index[("schemes.json<br/>AMFI master")] --> Engine
     TER[("ter.json<br/>AMFI TERs")] --> Engine
-    Holdings[("holdings.json<br/>top holdings")] --> Overlap["overlapReport()"]
+    Holdings[("holdings.json<br/>AMC disclosures, by ISIN")] --> Overlap["overlapReport()"]
     Engine --> Overlap
     Engine --> UI["Dashboard · Overlap · Costs · Goals · Learn"]
     Overlap --> UI
@@ -111,9 +116,10 @@ Deploying (Vercel free tier), regenerating the sample/data snapshots, decisions 
 
 ## Roadmap
 
-- [ ] Automated monthly ingestion of AMC portfolio disclosures (replace the approximate holdings snapshot)
+- [x] Automated monthly ingestion of AMC portfolio disclosures
+- [ ] Cover HDFC, ICICI, Kotak, Axis, UTI disclosures
 - [ ] NSDL / CDSL depository CAS support
-- [ ] Capital-gains view (STCG/LTCG, grandfathering) — facts only
+- [x] Capital-gains estimate (STCG/LTCG, grandfathering)
 - [ ] Scheduled refresh of AMFI scheme & TER snapshots via GitHub Actions
 - [ ] Hindi and other Indian-language explainers
 
