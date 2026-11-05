@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useMemo } from "react";
 import { WithPortfolio } from "@/components/Guard";
 import { HeroCard } from "@/components/dashboard/HeroCard";
@@ -34,6 +35,7 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
         <details className="rounded-2xl bg-watch-soft px-4 py-3 text-sm text-watch">
           <summary className="cursor-pointer font-semibold">{p.warnings.length} note{p.warnings.length > 1 ? "s" : ""} about your statement</summary>
           <ul className="mt-2 list-disc space-y-1 pl-5">{p.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
+          <Link href="/app/report" className="mt-2 inline-block font-semibold underline underline-offset-2">Numbers look wrong? Create an anonymised report →</Link>
         </details>
       )}
       <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
@@ -58,6 +60,9 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
           </ul>
         </section>
       )}
+      <p className="px-1 text-center text-xs text-ink-3">
+        Something look off? <Link href="/app/report" className="font-semibold underline underline-offset-2">Statement didn&apos;t parse right?</Link>
+      </p>
       <Disclaimer className="px-1 pt-2" />
     </div>
   );

@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { CASParseError } from "@/lib/cas/types";
+import Link from "next/link";
 import { useStore } from "@/store/store";
 
 type Phase = "idle" | "reading" | "password" | "parsing" | "error";
@@ -11,6 +12,8 @@ export const SAMPLE_PASSWORD = "mfxray";
 export function UploadCard() {
   const router = useRouter();
   const setCas = useStore((s) => s.setCas);
+  const setDiagnostic = useStore((s) => s.setDiagnostic);
+  const [canReport, setCanReport] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -22,10 +25,11 @@ export function UploadCard() {
   async function attempt(data: ArrayBuffer, pw?: string, sample = false) {
     setPhase("parsing");
     setError(null);
+    setCanReport(false);
     try {
       const { parseCASFile } = await import("@/lib/cas/browser");
-      const cas = await parseCASFile(data, pw);
-      setCas(cas, sample);
+      const { cas, diagnostic } = await parseCASFile(data, pw);
+      setCas(cas, sample, diagnostic);
       router.push("/app");
     } catch (e) {
       const err = e as CASParseError;
@@ -37,6 +41,10 @@ export function UploadCard() {
       } else {
         setPhase("error");
         setError(err.message || "Something went wrong reading this file.");
+        if (err.diagnostic) {
+          setDiagnostic(err.diagnostic);
+          setCanReport(true);
+        }
       }
     }
   }
@@ -154,7 +162,21 @@ export function UploadCard() {
           </div>
         </form>
       )}
-      {phase === "error" && error && <p className="mt-4 rounded-xl bg-watch-soft px-3 py-2 text-sm text-watch">{error}</p>}
+      {phase === "error" && error && (
+        <div role="alert" className="mt-4 rounded-xl bg-watch-soft px-3 py-3 text-sm text-watch">
+          <p>{error}</p>
+          <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-ink-2">
+            <li>Use the <strong>Detailed</strong> CAS from CAMS or KFintech (not a Summary, and not an NSDL/CDSL statement).</li>
+            <li>Choose “Specific period” from your first investment, or “Since inception”.</li>
+            <li>Open the PDF here as received — don&apos;t re-save or print it to a new PDF.</li>
+          </ul>
+          {canReport && (
+            <Link href="/app/report" className="mt-3 inline-block font-semibold underline underline-offset-2">
+              Statement didn&apos;t parse right? Create an anonymised report →
+            </Link>
+          )}
+        </div>
+      )}
       <p className="mt-5 flex items-center justify-center gap-2 text-xs text-ink-3">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z" /></svg>
         Parsed on your device. Your PDF and password never leave this browser.

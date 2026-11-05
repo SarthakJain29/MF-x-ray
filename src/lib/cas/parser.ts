@@ -60,29 +60,35 @@ const RE = {
 
 export function classifyTransaction(description: string, units: number | null, amount: number | null): TransactionType {
   const d = description.toLowerCase();
+  const u = units ?? 0;
   if (/stamp\s*duty/.test(d)) return "STAMP_DUTY_TAX";
   if (/\bstt\b|securities\s+transaction\s+tax/.test(d)) return "STT_TAX";
   if (/\btds\b|tax\s+deducted/.test(d)) return "TDS_TAX";
-  if (/segregat/.test(d)) return "SEGREGATION";
-  if (/reversal|rejection|reject/.test(d) || (/purchase|sip|systematic/.test(d) && (units ?? 0) < 0 && !/redemp/.test(d)))
-    return "REVERSAL";
+  if (/segregat|side\s*pocket/.test(d)) return "SEGREGATION";
+  if (/merger|merged|amalgamat/.test(d)) return u < 0 ? "MERGER_OUT" : "MERGER_IN";
+  if (/\bbonus\b/.test(d) && !/reversal/.test(d)) return "BONUS";
+  if (/reversal|reject|cancel/.test(d)) return "REVERSAL";
+  // A purchase-looking row that removes units is an unwound purchase, not a sale.
+  if (u < 0 && /purchase|instal?ment|investment/.test(d) && !/redemp|withdraw|switch|transfer/.test(d)) return "REVERSAL";
   if (/(idcw|dividend)/.test(d)) {
     if (/reinvest/.test(d)) return "DIVIDEND_REINVEST";
-    if (/payout|paid|declared/.test(d) || units == null || units === 0) return "DIVIDEND_PAYOUT";
+    if (/payout|paid|declared|payment/.test(d) || units == null || u === 0) return "DIVIDEND_PAYOUT";
   }
-  if (/switch|lateral/.test(d)) {
-    if (/\bout\b|switch-out|switch\s*out|to\s/.test(d) || (units ?? 0) < 0) return "SWITCH_OUT";
-    return "SWITCH_IN";
+  // Switches and systematic transfers (STP): direction from the unit sign when we have it.
+  if (/switch|lateral|systematic\s+transfer|\bstp\b|transfer\s+(in|out)/.test(d)) {
+    if (u < 0) return "SWITCH_OUT";
+    if (u > 0) return "SWITCH_IN";
+    return /\bout\b|to\s/.test(d) ? "SWITCH_OUT" : "SWITCH_IN";
   }
-  if (/redemp|redeem|withdraw|\bswp\b|systematic\s+withdrawal/.test(d) || (units ?? 0) < 0) return "REDEMPTION";
-  if (/systematic|\bsip\b|instal?ment|\bstp\b/.test(d)) return "PURCHASE_SIP";
-  if (/purchase|invest|subscri|\bnfo\b|new\s+fund/.test(d)) return "PURCHASE";
-  if ((units ?? 0) > 0) return "PURCHASE";
-  if ((amount ?? 0) !== 0 && units == null) return "MISC";
+  if (/redemp|redeem|withdraw|\bswp\b/.test(d) || u < 0) return "REDEMPTION";
+  if (/systematic|\bsip\b|instal?ment/.test(d)) return "PURCHASE_SIP";
+  if (/purchase|invest|subscri|\bnfo\b|new\s+fund|allot/.test(d)) return "PURCHASE";
+  if (u > 0) return "PURCHASE";
+  void amount;
   return "MISC";
 }
 
-function parseTxnLine(line: string): Transaction | null {
+export function parseTxnLine(line: string): Transaction | null {
   const start = RE.txnStart.exec(line);
   if (!start) return null;
   const date = parseCASDate(start[1]);
@@ -134,6 +140,7 @@ function emptyScheme(rtaCode: string | null, rawName: string): CASScheme {
     .replace(RE.advisor, "")
     .replace(/\s*-?\s*ISIN\s*:\s*[A-Z0-9]{12}/, "")
     .replace(/\(\s*Non-?\s*Demat\s*\)/i, "")
+    .replace(/\(\s*(merged|renamed|erstwhile|formerly|w\.?e\.?f)[^)]*\)/gi, "")
     .replace(/\s+-\s*$/, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -297,6 +304,13 @@ export function parseCASLines(lines: string[]): CASData {
         data.warnings.push(`Units for "${s.name}" don't reconcile (computed ${sum.toFixed(3)} vs closing ${s.close.toFixed(3)}).`);
       }
       if (s.valuation.value == null && s.valuation.nav != null) s.valuation.value = round2(s.close * s.valuation.nav);
+      if (s.close > 0.0005 && s.valuation.value == null && s.valuation.nav == null) {
+        const last = [...s.transactions].reverse().find((t) => t.nav && t.nav > 0);
+        if (last) {
+          s.valuation = { ...s.valuation, nav: last.nav, date: last.date, value: round2(s.close * last.nav!) };
+          data.warnings.push(`No valuation line found for "${s.name}"; valued at its last transaction NAV (${last.date}) until a live NAV loads.`);
+        }
+      }
     }
   }
   data.folios = data.folios.filter((f) => f.schemes.length > 0);
@@ -305,3 +319,21 @@ export function parseCASLines(lines: string[]): CASData {
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * Lines that look like they should have been understood but weren't: they start with a date yet don't parse as a
+ * transaction, or carry several amounts but match nothing. Used to focus anonymised diagnostic reports.
+ */
+export function findSuspectLines(lines: string[]): number[] {
+  const out: number[] = [];
+  lines.forEach((raw, i) => {
+    const line = raw.replace(/\u00a0/g, " ");
+    if (RE.txnStart.test(line)) {
+      if (!parseTxnLine(line) && !/to\s+\d{2}-[A-Za-z]{3}-\d{4}/i.test(line) && !/\bNAV on\b|Valuation|Market Value/i.test(line)) out.push(i);
+      return;
+    }
+    const nums = line.match(/\(?-?\d[\d,]*\.\d{2,4}\)?/g)?.length ?? 0;
+    if (nums >= 3 && !RE.open.test(line) && !RE.close.test(line) && !RE.nav.test(line) && !RE.cost.test(line) && !RE.value.test(line) && !/cost value|market value|total/i.test(line)) out.push(i);
+  });
+  return out;
+}

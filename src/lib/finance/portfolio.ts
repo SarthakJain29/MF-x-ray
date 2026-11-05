@@ -4,6 +4,7 @@ import type { SchemeIndex } from "../data/schemeIndex";
 import { estimateTer, type TerIndex, type TerInfo } from "../data/ter";
 import { AssetClass, assetClassFor, familyName, friendlyCategory, optionOf, planOf } from "./categorize";
 import { CashFlow, xirr } from "./xirr";
+import { allocateMerger, runFifo, type Disposal, type Lot, type MergerOut } from "./lots";
 
 export interface Holding {
   id: string;
@@ -36,6 +37,10 @@ export interface Holding {
   firstDate: string | null;
   transactions: Transaction[];
   cashflows: CashFlow[];
+  /** Units still held, as FIFO lots (acquisition date + cost) */
+  lots: Lot[];
+  /** Sales and switch-outs, each with the lots they consumed */
+  disposals: Disposal[];
   ter: TerInfo;
   /** AMFI code of the direct-plan twin, when this is a regular plan. */
   directCode: number | null;
@@ -79,65 +84,6 @@ export interface BuildOptions {
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
-interface Lot {
-  units: number;
-  cost: number;
-}
-
-function fifo(txns: Transaction[], openUnits: number) {
-  const lots: Lot[] = openUnits > 0 ? [{ units: openUnits, cost: 0 }] : [];
-  let realised = 0;
-  let invested = 0;
-  let withdrawn = 0;
-  for (const t of txns) {
-    const units = t.units ?? 0;
-    const amt = Math.abs(t.amount ?? 0);
-    switch (t.type) {
-      case "STAMP_DUTY_TAX":
-        invested += amt;
-        if (lots.length) lots[lots.length - 1].cost += amt;
-        continue;
-      case "STT_TAX":
-      case "TDS_TAX":
-        withdrawn -= amt;
-        realised -= amt;
-        continue;
-      case "DIVIDEND_PAYOUT":
-        withdrawn += amt;
-        realised += amt;
-        continue;
-      default:
-        break;
-    }
-    if (units > 0) {
-      const isCash = t.type === "PURCHASE" || t.type === "PURCHASE_SIP" || t.type === "SWITCH_IN";
-      if (isCash) invested += amt;
-      lots.push({ units, cost: t.type === "SEGREGATION" || t.amount == null ? 0 : amt });
-    } else if (units < 0) {
-      let toSell = -units;
-      let consumed = 0;
-      while (toSell > 1e-9 && lots.length) {
-        const lot = lots[0];
-        const take = Math.min(lot.units, toSell);
-        const c = lot.units > 0 ? (lot.cost * take) / lot.units : 0;
-        consumed += c;
-        lot.units -= take;
-        lot.cost -= c;
-        toSell -= take;
-        if (lot.units <= 1e-9) lots.shift();
-      }
-      if (t.type === "REVERSAL") {
-        invested -= amt;
-      } else {
-        withdrawn += amt;
-        realised += amt - consumed;
-      }
-    }
-  }
-  const cost = lots.reduce((s, l) => s + l.cost, 0);
-  return { cost, realised, invested, withdrawn };
-}
-
 export function cashflowsFor(txns: Transaction[]): CashFlow[] {
   const flows: CashFlow[] = [];
   for (const t of txns) {
@@ -148,6 +94,9 @@ export function cashflowsFor(txns: Transaction[]): CashFlow[] {
       case "DIVIDEND_REINVEST":
       case "MISC":
       case "SEGREGATION":
+      case "BONUS":
+      case "MERGER_IN":
+      case "MERGER_OUT":
         continue;
       case "STAMP_DUTY_TAX":
       case "STT_TAX":
@@ -177,6 +126,26 @@ export function buildPortfolio(cas: CASData, opts: BuildOptions = {}): Portfolio
   const all: Holding[] = [];
   const warnings = [...cas.warnings];
 
+  // Pass 1 — units that left a folio in a merger, so the receiving scheme inherits cost and dates.
+  const sorted = (txns: Transaction[]) => [...txns].sort((a, b) => a.date.localeCompare(b.date));
+  const mergerPool = new Map<string, MergerOut[]>(); // `${folio}|${date}`
+  const mergerIns = new Map<string, { units: number; amount: number }[]>();
+  for (const folio of cas.folios) {
+    for (const s of folio.schemes) {
+      const t = sorted(s.transactions);
+      if (!t.some((x) => x.type === "MERGER_OUT" || x.type === "MERGER_IN")) continue;
+      for (const m of runFifo(t, s.open).mergerOuts) {
+        const k = `${folio.folio}|${m.date}`;
+        mergerPool.set(k, [...(mergerPool.get(k) ?? []), m]);
+      }
+      for (const x of t) {
+        if (x.type !== "MERGER_IN") continue;
+        const k = `${folio.folio}|${x.date}`;
+        mergerIns.set(k, [...(mergerIns.get(k) ?? []), { units: x.units ?? 0, amount: Math.abs(x.amount ?? 0) }]);
+      }
+    }
+  }
+
   for (const folio of cas.folios) {
     for (const s of folio.schemes) {
       const plan = planOf(s.name, s.advisor);
@@ -184,9 +153,22 @@ export function buildPortfolio(cas: CASData, opts: BuildOptions = {}): Portfolio
       const info = schemeIndex?.lookupIsin(s.isin) ?? schemeIndex?.lookupName(s.name, plan, option) ?? null;
       const category = friendlyCategory(info?.category, s.name);
       const assetClass = assetClassFor(info?.category, category, s.name);
-      const txns = [...s.transactions].sort((a, b) => a.date.localeCompare(b.date));
+      const txns = sorted(s.transactions);
       const incompleteHistory = s.open > 0.001;
-      const f = fifo(txns, s.open);
+      const seenIn = new Map<string, number>();
+      const f = runFifo(txns, s.open, {
+        mergerIn: (t) => {
+          const k = `${folio.folio}|${t.date}`;
+          const pool = mergerPool.get(k);
+          const ins = mergerIns.get(k);
+          if (!pool || !ins) return null;
+          const i = seenIn.get(k) ?? 0;
+          seenIn.set(k, i + 1);
+          // this scheme's n-th merger-in on that date: find its position among the folio's receivers
+          const mine = ins.findIndex((x, j) => j >= i && Math.abs(x.units - (t.units ?? 0)) < 1e-6 && Math.abs(x.amount - Math.abs(t.amount ?? 0)) < 1e-6);
+          return allocateMerger(pool, ins, mine >= 0 ? mine : 0);
+        },
+      });
       const units = s.close;
 
       let nav = s.valuation.nav;
@@ -236,6 +218,8 @@ export function buildPortfolio(cas: CASData, opts: BuildOptions = {}): Portfolio
         firstDate: txns[0]?.date ?? null,
         transactions: txns,
         cashflows: flows,
+        lots: f.lots,
+        disposals: f.disposals,
         ter,
         directCode: directTwin?.code ?? null,
       });

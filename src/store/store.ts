@@ -5,6 +5,7 @@
  */
 import { create } from "zustand";
 import type { CASData } from "@/lib/cas/types";
+import type { DiagnosticLines } from "@/lib/cas/diagnostic";
 import type { Goal } from "@/lib/finance/goals";
 
 export interface ChatTurn {
@@ -16,12 +17,15 @@ export interface ChatTurn {
 interface State {
   hydrated: boolean;
   cas: CASData | null;
+  /** Redacted statement layout for the optional "didn't parse right?" report. Memory only — never persisted. */
+  diagnostic: DiagnosticLines | null;
   isSample: boolean;
   remember: boolean;
   goals: Goal[];
   costAssumption: number;
   chat: ChatTurn[];
-  setCas: (cas: CASData, isSample: boolean) => void;
+  setCas: (cas: CASData, isSample: boolean, diagnostic?: DiagnosticLines | null) => void;
+  setDiagnostic: (d: DiagnosticLines | null) => void;
   setRemember: (v: boolean) => void;
   upsertGoal: (g: Goal) => void;
   removeGoal: (id: string) => void;
@@ -51,15 +55,17 @@ function save(s: State) {
 export const useStore = create<State>((set, get) => ({
   hydrated: false,
   cas: null,
+  diagnostic: null,
   isSample: false,
   remember: false,
   goals: [],
   costAssumption: 10,
   chat: [],
-  setCas: (cas, isSample) => {
-    set({ cas, isSample, chat: [] });
+  setCas: (cas, isSample, diagnostic = null) => {
+    set({ cas, isSample, diagnostic, chat: [] });
     save(get());
   },
+  setDiagnostic: (diagnostic) => set({ diagnostic }),
   setRemember: (v) => {
     set({ remember: v });
     save(get());
@@ -86,7 +92,7 @@ export const useStore = create<State>((set, get) => ({
     } catch {
       /* ignore */
     }
-    set({ cas: null, isSample: false, remember: false, goals: [], chat: [], costAssumption: 10 });
+    set({ cas: null, diagnostic: null, isSample: false, remember: false, goals: [], chat: [], costAssumption: 10 });
   },
 }));
 

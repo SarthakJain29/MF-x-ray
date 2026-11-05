@@ -11,6 +11,9 @@ export type TransactionType =
   | "TDS_TAX"
   | "REVERSAL"
   | "SEGREGATION"
+  | "BONUS"
+  | "MERGER_IN"
+  | "MERGER_OUT"
   | "MISC";
 
 export interface Transaction {
@@ -71,8 +74,12 @@ export interface CASData {
   warnings: string[];
 }
 
+import type { DiagnosticLines } from "./diagnostic";
+
 export class CASParseError extends Error {
   code: "PASSWORD_REQUIRED" | "INCORRECT_PASSWORD" | "NOT_A_CAS" | "SUMMARY_CAS" | "EMPTY" | "UNKNOWN";
+  /** Redacted layout of the statement, attached when text was extracted but parsing failed. */
+  diagnostic?: DiagnosticLines;
   constructor(code: CASParseError["code"], message: string) {
     super(message);
     this.code = code;
