@@ -1,0 +1,53 @@
+name: Refresh public data snapshots
+
+# AMCs must publish month-end portfolios within 10 days; run on the 12th and open a PR with the new snapshots.
+on:
+  schedule:
+    - cron: "17 3 12 * *" # 12th of every month, 08:47 IST
+  workflow_dispatch:
+    inputs:
+      ter:
+        description: "Also refresh AMFI expense ratios (slow, ~30 min)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Playwright renders AMC download pages (many are client-side rendered). Not an app dependency.
+      - run: npm i --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: AMFI scheme master
+        run: npm run data:schemes
+      - name: AMC portfolio disclosures → holdings snapshot
+        run: npm run data:holdings
+      - name: AMFI expense ratios
+        if: ${{ github.event_name == 'schedule' || inputs.ter }}
+        run: npm run data:ter
+      - name: Tests still pass on the new data
+        run: npm test
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/monthly-refresh
+          commit-message: Refresh AMFI scheme master, AMC holdings and TER snapshots
+          title: "Data: monthly refresh of holdings / schemes / TER snapshots"
+          body: |
+            Automated monthly refresh of the bundled public data snapshots:
+            - `public/data/holdings.json` — AMC monthly portfolio disclosures (see `scripts/holdings/`)
+            - `public/data/schemes.json` — AMFI NAVAll scheme master
+            - `public/data/ter.json` — AMFI TER disclosures (when enabled)
+
+            Review the ingest log in the workflow run for AMCs that failed to publish or parse.
+          add-paths: |
+            public/data/*.json

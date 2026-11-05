@@ -1,0 +1,28 @@
+CAMS - Mutual Fund Statement
+Consolidated Account Statement
+01-Jan-2018 To 31-Oct-2026
+Email Id: noisy.user@example.com
+Noisy Investor Three
+Door 3, Fake Lane
+Chennai - 600001
+Mobile: +91 9000000003
+This Consolidated Account Statement is brought to you as an investor friendly initiative by CAMS and KFintech.
+PORTFOLIO SUMMARY
+Mutual Fund		Cost Value (INR)		Market Value (INR)
+Quant Mutual Fund		50,000.00		80,000.00
+Total		50,000.00		80,000.00
+Quant Mutual Fund
+Folio No: 7777777		PAN: DDDDD4444D		KYC: OK PAN: OK
+QSCF-Quant Small Cap Fund - Direct Plan - Growth Option (Non-Demat) - ISIN: INF966L01689
+(Advisor: DIRECT)		Registrar : CAMS
+Nominee 1: Fake Nominee		Nominee 2:		Nominee 3:
+Opening Unit Balance: 0.000
+02-Feb-2018		Purchase - via Internet		50,000.00		1,000.000		50.0000		1,000.000
+Page 2 of 3
+Consolidated Account Statement - 01-Jan-2018 To 31-Oct-2026
+CAMSONLINE-Toll free 1800 000 0000 (Mon-Sat)
+Date		Transaction		Amount (INR)		Units		NAV (INR)		Unit Balance
+IDCW Reinvestment @ Rs. 1.00 per unit - wrapped description line
+03-Mar-2018		Dividend Reinvested @ Rs. 1.00 per unit		1,000.00		20.000		50.0000		1,020.000
+Closing Unit Balance: 1,020.000		NAV on 31-Oct-2026: INR 78.4314		Total Cost Value: 50,000.00		Market Value on 31-Oct-2026: INR 80,000.00
+*** Please note: statement as of 31-Oct-2026 - Page 3 of 3 ***
