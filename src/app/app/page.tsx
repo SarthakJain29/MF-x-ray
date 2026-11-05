@@ -11,6 +11,8 @@ import { Disclaimer } from "@/components/Disclaimer";
 import { RememberBanner } from "@/components/dashboard/RememberBanner";
 import { BenchmarkCard } from "@/components/dashboard/BenchmarkCard";
 import { OverlapTeaser } from "@/components/dashboard/OverlapTeaser";
+import { ShareCardButton } from "@/components/ShareCardDialog";
+import { Tour } from "@/components/Tour";
 import { healthFacts, healthHeadline } from "@/lib/health";
 import { buildTimeline } from "@/lib/finance/timeline";
 import { useStore } from "@/store/store";
@@ -29,6 +31,7 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
 
   return (
     <div className="space-y-4">
+      <Tour />
       <HeroCard p={p} navStatus={navStatus} name={name} />
       <RememberBanner />
       {p.warnings.length > 0 && (
@@ -60,6 +63,7 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
           </ul>
         </section>
       )}
+      <ShareCardButton p={p} overlap={overlap} />
       <p className="px-1 text-center text-xs text-ink-3">
         Something look off? <Link href="/app/report" className="font-semibold underline underline-offset-2">Statement didn&apos;t parse right?</Link>
       </p>

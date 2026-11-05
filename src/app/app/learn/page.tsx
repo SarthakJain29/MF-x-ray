@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { LEARN_CARDS } from "@/lib/learn";
 import { GLOSSARY } from "@/lib/glossary";
 import { Disclaimer } from "@/components/Disclaimer";
+import { startTour } from "@/components/Tour";
+import Link from "next/link";
 
 const TAGS = ["All", "Basics", "Returns", "Costs", "Risk", "Your CAS"] as const;
 
@@ -24,6 +26,7 @@ export default function LearnPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-3">Learn</p>
         <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight">Two-minute lessons</h1>
         <p className="mt-2 max-w-xl text-ink-2">Short, jargon-free explainers for the ideas behind every number in MF X-ray.</p>
+        <Link href="/app" onClick={() => startTour()} className="mt-3 inline-block text-sm font-semibold text-brand underline underline-offset-2">Replay the quick tour →</Link>
       </header>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         {TAGS.map((t) => (
