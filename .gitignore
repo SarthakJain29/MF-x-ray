@@ -42,3 +42,4 @@ yarn-error.log*
 next-env.d.ts
 scripts/.nav-cache.json
 public/pdf.worker.min.mjs
+scripts/.holdings-cache/
