@@ -34,6 +34,15 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
       <Tour />
       <HeroCard p={p} navStatus={navStatus} name={name} />
       <RememberBanner />
+      {p.holdings.length === 0 && (
+        <section className="card p-5">
+          <h2 className="font-display text-lg font-bold">No units held right now</h2>
+          <p className="mt-1 text-sm text-ink-2">
+            Every fund in this statement has been fully redeemed, so there&apos;s nothing to value, overlap or project. Your past sales are below, and the Tax tab shows the gains they
+            realised. If you still hold funds, check that the statement covers up to today.
+          </p>
+        </section>
+      )}
       {p.warnings.length > 0 && (
         <details className="rounded-2xl bg-watch-soft px-4 py-3 text-sm text-watch">
           <summary className="cursor-pointer font-semibold">{p.warnings.length} note{p.warnings.length > 1 ? "s" : ""} about your statement</summary>
