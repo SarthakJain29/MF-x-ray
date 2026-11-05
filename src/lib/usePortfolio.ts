@@ -9,6 +9,7 @@ import type { NavSeries } from "@/lib/finance/costs";
 import { buildPortfolio, type LatestNav, type Portfolio } from "@/lib/finance/portfolio";
 import { overlapReport, type OverlapReport } from "@/lib/overlap";
 import { BENCHMARK } from "@/lib/finance/benchmark";
+import { loadHoldingsIndex, type HoldingsIndex } from "@/lib/holdings/snapshot";
 
 export interface PortfolioState {
   ready: boolean;
@@ -16,7 +17,7 @@ export interface PortfolioState {
   overlap: OverlapReport | null;
   navs: Record<number, NavSeries>;
   navStatus: "idle" | "loading" | "done" | "failed";
-  indexes: { scheme: SchemeIndex | null; ter: TerIndex | null; loaded: boolean };
+  indexes: { scheme: SchemeIndex | null; ter: TerIndex | null; holdings: HoldingsIndex | null; loaded: boolean };
 }
 
 let indexCache: PortfolioState["indexes"] | null = null;
@@ -24,15 +25,15 @@ let navCache: Record<number, NavSeries> = {};
 
 export function usePortfolio(): PortfolioState {
   const cas = useStore((s) => s.cas);
-  const [indexes, setIndexes] = useState(indexCache ?? { scheme: null, ter: null, loaded: false });
+  const [indexes, setIndexes] = useState<PortfolioState["indexes"]>(indexCache ?? { scheme: null, ter: null, holdings: null, loaded: false });
   const [navs, setNavs] = useState<Record<number, NavSeries>>(navCache);
   const [navStatus, setNavStatus] = useState<PortfolioState["navStatus"]>(Object.keys(navCache).length ? "done" : "idle");
 
   useEffect(() => {
     if (indexes.loaded) return;
     let alive = true;
-    Promise.all([loadSchemeIndex(), loadTerIndex()]).then(([scheme, ter]) => {
-      indexCache = { scheme, ter, loaded: true };
+    Promise.all([loadSchemeIndex(), loadTerIndex(), loadHoldingsIndex()]).then(([scheme, ter, holdings]) => {
+      indexCache = { scheme, ter, holdings, loaded: true };
       if (alive) setIndexes(indexCache);
     });
     return () => {
@@ -73,7 +74,7 @@ export function usePortfolio(): PortfolioState {
     return Object.keys(latestNav).length ? buildPortfolio(cas, { schemeIndex: indexes.scheme, terIndex: indexes.ter, latestNav }) : base;
   }, [cas, base, navs, indexes]);
 
-  const overlap = useMemo(() => (portfolio ? overlapReport(portfolio.holdings) : null), [portfolio]);
+  const overlap = useMemo(() => (portfolio ? overlapReport(portfolio.holdings, indexes.holdings) : null), [portfolio, indexes.holdings]);
 
   return { ready: !!portfolio, portfolio, overlap, navs, navStatus, indexes };
 }

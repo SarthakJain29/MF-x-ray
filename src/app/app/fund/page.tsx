@@ -9,7 +9,8 @@ import { NavChart } from "@/components/charts/NavChart";
 import { casNavSeries } from "@/lib/finance/timeline";
 import { pastRegularCost, estimatedPastRegularCost } from "@/lib/finance/costs";
 import { paidTer } from "@/lib/finance/portfolio";
-import { holdingsFor } from "@/lib/overlap";
+import { holdingsFor, SOURCE_LABEL } from "@/lib/overlap";
+import { SourceBadge } from "@/components/SourceBadge";
 import { fmtDate, inr, inrShort, pct, signedPct } from "@/lib/format";
 
 export default function FundPage() {
@@ -22,7 +23,7 @@ export default function FundPage() {
 
 function FundInner({ s }: { s: Parameters<Parameters<typeof WithPortfolio>[0]["children"]>[0] }) {
   const id = useSearchParams().get("id");
-  const { portfolio: p, navs } = s;
+  const { portfolio: p, navs, indexes } = s;
   const h = [...p.holdings, ...p.closed].find((x) => x.id === id);
   const [showAll, setShowAll] = useState(false);
   const series = h ? (h.amfiCode != null ? navs[h.amfiCode] : undefined) ?? casNavSeries(h) : null;
@@ -43,7 +44,7 @@ function FundInner({ s }: { s: Parameters<Parameters<typeof WithPortfolio>[0]["c
         Fund not found. <Link href="/app" className="text-brand underline">Back to overview</Link>
       </div>
     );
-  const top = holdingsFor(h.name);
+  const top = holdingsFor(h, indexes.holdings);
   const ter = paidTer(h);
   const txns = [...h.transactions].reverse();
   const shown = showAll ? txns : txns.slice(0, 8);
@@ -106,12 +107,20 @@ function FundInner({ s }: { s: Parameters<Parameters<typeof WithPortfolio>[0]["c
 
       {top && (
         <section className="card p-4 sm:p-6">
-          <h2 className="font-display text-lg font-bold">Top holdings {top.source === "index" ? `(tracks ${top.label})` : ""}</h2>
-          <p className="mt-1 text-xs text-ink-3">Approximate snapshot ({top.asOf}) — see the Overlap tab for sources.</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-display text-lg font-bold">Top holdings{top.source === "index-proxy" ? ` (tracks ${top.label})` : ""}</h2>
+            <SourceBadge source={top.source} asOf={top.asOf} />
+          </div>
+          <p className="mt-1 text-xs text-ink-3">
+            {SOURCE_LABEL[top.source]}
+            {top.equityPct != null ? ` · ${top.equityPct.toFixed(0)}% of the fund is in shares, across ${top.holdings.length} companies` : ""}
+          </p>
           <ul className="mt-3 space-y-2">
             {top.holdings.slice(0, 10).map((w) => (
-              <li key={w.name} className="grid grid-cols-[1fr_auto] items-center gap-x-3 text-sm">
-                <span className="truncate">{w.name}</span>
+              <li key={w.id} className="grid grid-cols-[1fr_auto] items-center gap-x-3 text-sm">
+                <span className="min-w-0 truncate">
+                  {w.name} <span className="text-xs text-ink-3">{w.sector !== "Other" ? `· ${w.sector}` : ""}</span>
+                </span>
                 <span className="num text-ink-2">{w.weight.toFixed(1)}%</span>
                 <div className="col-span-2 mt-1 h-1.5 rounded-full bg-surface-2">
                   <div className="h-full rounded-full bg-[var(--s7)]" style={{ width: `${Math.min(100, w.weight * 6)}%` }} />

@@ -68,10 +68,16 @@ export function localAnswer(question: string, ctx: AiContext): string {
   }
   if (/overlap|same stock|common|duplicate|similar/.test(q)) {
     if (!ctx.overlaps.length) return "I don't have holdings data for enough of your equity funds to measure overlap. The Overlap tab shows which funds share a category instead.";
-    return ["Biggest overlaps between your funds (based on top disclosed holdings):", ...ctx.overlaps.slice(0, 4).map((o) => `• ${o.fundA} ↔ ${o.fundB}: ${o.overlapPct}% (e.g. ${o.commonTop.slice(0, 3).join(", ")})`)].join("\n");
+    return [
+      `Biggest overlaps between your funds${ctx.holdingsDataMonth ? ` (holdings as of ${ctx.holdingsDataMonth})` : ""}:`,
+      ...ctx.overlaps.slice(0, 4).map((o) => `• ${o.fundA} ↔ ${o.fundB}: ${o.verdict} (e.g. ${o.commonTop.slice(0, 3).join(", ")})`),
+    ].join("\n");
   }
   if (/stock|company|hdfc bank|reliance|exposure|own/.test(q) && ctx.topStockExposure.length) {
     return ["Your largest look-through stock exposures across funds:", ...ctx.topStockExposure.slice(0, 6).map((s) => `• ${s.stock}: ${inrShort(s.value)} (${s.pctOfEquity}% of your equity)`)].join("\n");
+  }
+  if (/sector|industry|industries|bank(s|ing)? exposure/.test(q) && Object.keys(ctx.sectorExposurePct).length) {
+    return ["Your equity money by sector (across all funds):", ...Object.entries(ctx.sectorExposurePct).map(([k, v]) => `• ${k}: ${v}%`)].join("\n");
   }
   if (/equity|debt|allocation|split|mix|asset|gold|hybrid/.test(q)) {
     return ["Your money is split like this:", ...Object.entries(ctx.allocation.assetClass).map(([k, v]) => `• ${k}: ${v}%`), "", "There's no universally right split; it depends on when you need the money and how much short-term movement you can live with."].join("\n");

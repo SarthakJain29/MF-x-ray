@@ -78,17 +78,28 @@ export function healthFacts(p: Portfolio, overlap: OverlapReport | null): Health
   }
 
   if (overlap && overlap.pairs.length) {
-    const high = overlap.pairs.filter((x) => x.overlap >= 30);
-    if (high.length) {
+    const top = overlap.pairs[0];
+    const nameOf = (id: string) => p.holdings.find((h) => h.id === id)?.shortName ?? "";
+    if (top.overlap >= 35) {
       facts.push({
         id: "overlap",
         tone: "watch",
-        title: `${high.length} fund pair${high.length === 1 ? "" : "s"} overlap by 30% or more`,
-        body: "Highly overlapping funds own many of the same companies, so owning both adds less diversification than it seems.",
+        title: `${nameOf(top.a)} and ${nameOf(top.b)} are ${Math.round(top.overlap)}% the same`,
+        body: `They share ${top.common.length} companies. Highly overlapping funds behave alike, so owning both adds less diversification than it seems.`,
         term: "overlap",
       });
     } else {
-      facts.push({ id: "overlap", tone: "good", title: "Low overlap between your equity funds", body: "Your equity funds own fairly different sets of companies (based on their top disclosed holdings).", term: "overlap" });
+      facts.push({ id: "overlap", tone: "good", title: "Your equity funds own fairly different companies", body: `Your most similar pair overlaps ${Math.round(top.overlap)}%.`, term: "overlap" });
+    }
+    if (overlap.exposure[0] && overlap.exposure[0].shareOfEquity > 0.07) {
+      const e = overlap.exposure[0];
+      facts.push({
+        id: "top-stock",
+        tone: "neutral",
+        title: `${pct(e.shareOfEquity, 0)} of your equity money is in ${e.name}`,
+        body: `Through ${e.funds.length} different fund${e.funds.length > 1 ? "s" : ""}. Look-through exposure adds up what you own across all funds.`,
+        term: "look-through",
+      });
     }
   }
 

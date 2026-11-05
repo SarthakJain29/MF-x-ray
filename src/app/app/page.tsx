@@ -9,6 +9,7 @@ import { ValueChart } from "@/components/charts/ValueChart";
 import { Disclaimer } from "@/components/Disclaimer";
 import { RememberBanner } from "@/components/dashboard/RememberBanner";
 import { BenchmarkCard } from "@/components/dashboard/BenchmarkCard";
+import { OverlapTeaser } from "@/components/dashboard/OverlapTeaser";
 import { healthFacts, healthHeadline } from "@/lib/health";
 import { buildTimeline } from "@/lib/finance/timeline";
 import { useStore } from "@/store/store";
@@ -39,6 +40,7 @@ function DashboardInner({ s }: { s: PortfolioState & { portfolio: NonNullable<Po
         <ValueChart points={timeline.points} live={timeline.usedLiveNavs} />
         <HealthCard headline={healthHeadline(p)} facts={facts.slice(0, 4)} />
       </div>
+      {overlap && <OverlapTeaser r={overlap} holdings={p.holdings} />}
       <AllocationCard p={p} />
       <BenchmarkCard p={p} navs={navs} />
       <FundList holdings={p.holdings} total={p.value} />

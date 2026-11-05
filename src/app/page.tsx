@@ -7,7 +7,7 @@ import { ResumeLink } from "@/components/ResumeLink";
 
 const FEATURES = [
   { k: "XIRR", t: "Your real return", d: "True XIRR for the whole portfolio and every fund — the fair way to measure SIPs.", c: "var(--s1)" },
-  { k: "∩", t: "Fund overlap", d: "Find funds that secretly own the same companies, and how much of each stock you hold.", c: "var(--s7)" },
+  { k: "∩", t: "Fund overlap", d: "“These 2 funds are 68% the same.” Real month-end holdings from fund-house disclosures, your true top 10 stocks and sectors.", c: "var(--s7)" },
   { k: "₹", t: "Cost X-ray", d: "Expense-ratio drag in rupees over 5, 10, 20 years. Regular plans flagged, with money lost.", c: "var(--s2)" },
   { k: "◎", t: "Goal tracker", d: "Earmark funds for goals. See progress — with growth assumptions you choose.", c: "var(--s3)" },
   { k: "?", t: "Plain language", d: "Every term explained on tap. A health summary that reads like a friend wrote it.", c: "var(--s5)" },

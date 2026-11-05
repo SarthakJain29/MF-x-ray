@@ -28,8 +28,10 @@ export interface AiContext {
   totals: { value: number; cost: number; gain: number; realisedGain: number; xirrPct: number | null; funds: number; weightedExpenseRatioPct: number | null };
   allocation: { assetClass: Record<string, number>; category: Record<string, number>; fundHouse: Record<string, number> };
   funds: AiFund[];
-  overlaps: { fundA: string; fundB: string; overlapPct: number; commonTop: string[] }[];
-  topStockExposure: { stock: string; value: number; pctOfEquity: number }[];
+  overlaps: { fundA: string; fundB: string; overlapPct: number; verdict: string; commonTop: string[] }[];
+  topStockExposure: { stock: string; value: number; pctOfEquity: number; viaFunds: number }[];
+  sectorExposurePct: Record<string, number>;
+  holdingsDataMonth: string | null;
 }
 
 const r0 = (n: number) => Math.round(n);
@@ -71,9 +73,12 @@ export function buildAiContext(p: Portfolio, overlap: OverlapReport | null): AiC
       fundA: nameOf.get(x.a) ?? "?",
       fundB: nameOf.get(x.b) ?? "?",
       overlapPct: x.overlap,
+      verdict: x.verdict,
       commonTop: x.common.slice(0, 5).map((c) => c.name),
     })),
-    topStockExposure: (overlap?.exposure ?? []).slice(0, 10).map((e) => ({ stock: e.name, value: e.value, pctOfEquity: r1(e.shareOfEquity * 100) })),
+    topStockExposure: (overlap?.exposure ?? []).slice(0, 10).map((e) => ({ stock: e.name, value: e.value, pctOfEquity: r1(e.shareOfEquity * 100), viaFunds: e.funds.length })),
+    sectorExposurePct: Object.fromEntries((overlap?.sectors ?? []).slice(0, 8).map((s) => [s.sector, r1(s.share * 100)])),
+    holdingsDataMonth: overlap?.dataMonth ?? null,
   };
 }
 

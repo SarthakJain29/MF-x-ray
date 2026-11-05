@@ -31,3 +31,9 @@ export function fmtMonth(iso: string): string {
   return `${MON[+m - 1]} '${y.slice(2)}`;
 }
 export const todayIso = () => new Date().toISOString().slice(0, 10);
+
+/** "2026-09" → "Sep 2026" */
+export function fmtYearMonth(ym: string | null | undefined): string {
+  if (!ym || !/^\d{4}-\d{2}/.test(ym)) return ym ?? "—";
+  return `${MON[+ym.slice(5, 7) - 1]} ${ym.slice(0, 4)}`;
+}

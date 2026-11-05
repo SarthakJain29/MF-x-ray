@@ -4,6 +4,7 @@ import { extractLines } from "@/lib/cas/extract";
 import { parseCASLines } from "@/lib/cas/parser";
 import { SchemeIndex, type SchemeIndexFile } from "@/lib/data/schemeIndex";
 import { TerIndex, type TerFile } from "@/lib/data/ter";
+import { HoldingsIndex, type HoldingsSnapshotFile } from "@/lib/holdings/snapshot";
 
 export const ROOT = path.resolve(__dirname, "..");
 
@@ -31,4 +32,8 @@ export async function loadIndexes() {
 
 export async function expected() {
   return JSON.parse(await readFile(path.join(ROOT, "tests/fixtures/sample-cas.expected.json"), "utf8"));
+}
+
+export async function loadHoldings() {
+  return new HoldingsIndex(JSON.parse(await readFile(path.join(ROOT, "public/data/holdings.json"), "utf8")) as HoldingsSnapshotFile);
 }
