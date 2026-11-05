@@ -81,6 +81,14 @@ export const LEARN_CARDS: LearnCard[] = [
     ],
   },
   {
+    id: "tax", emoji: "🧮", tag: "Returns", minutes: 2, title: "How fund gains are taxed",
+    body: [
+      "Tax is due only when you sell (or switch). Each unit is judged by how long you held it — the oldest units are treated as sold first (FIFO).",
+      "Equity funds: held over 12 months → long-term, 12.5% on gains above ₹1.25 lakh a year; otherwise 20%. Debt funds bought since April 2023: taxed at your slab rate, however long you hold.",
+      "MF X-ray's Tax tab estimates this from your statement. It's a guide — your fund house's capital-gains statement and a tax professional have the final word.",
+    ],
+  },
+  {
     id: "advice", emoji: "🛡️", tag: "Basics", minutes: 1, title: "Facts vs advice",
     body: [
       "MF X-ray explains what's in your portfolio. It doesn't tell you what to buy or sell.",

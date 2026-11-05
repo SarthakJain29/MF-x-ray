@@ -45,6 +45,11 @@ export const GLOSSARY: Record<string, Term> = Object.fromEntries(
       { id: "stamp-duty", term: "Stamp duty", short: "A small government charge (0.005%) on mutual fund purchases since July 2020." },
       { id: "assumption", term: "Your assumption", short: "A growth rate YOU choose for a what-if calculation. It's not a prediction — markets don't move in straight lines." },
       { id: "compounding", term: "Compounding", short: "Growth on top of growth. It works for your returns — and against you for fees." },
+      { id: "stcg", term: "STCG", short: "Short-term capital gain — profit on units sold before they count as long-term (12 months for equity funds, 24 for most others)." },
+      { id: "ltcg", term: "LTCG", short: "Long-term capital gain — profit on units held longer than the threshold. Equity-fund LTCG up to ₹1.25 lakh a year is tax-free; above that, 12.5%." },
+      { id: "fifo", term: "FIFO", short: "First in, first out: when you sell, the units you bought earliest are treated as sold first. That's how tax on fund units is worked out in India." },
+      { id: "grandfathering", term: "Grandfathering", short: "For equity units bought on or before 31 Jan 2018, gains up to that date's value are protected from LTCG tax — the cost is stepped up to the 31-Jan-2018 NAV." },
+      { id: "financial-year", term: "Financial year (FY)", short: "India's tax year: 1 April to 31 March. FY 2026-27 runs from 1 Apr 2026 to 31 Mar 2027." },
       { id: "benchmark", term: "Benchmark", short: "An index a fund compares itself to, e.g. Nifty 50 for large-cap funds." },
     ] satisfies Term[]
   ).map((t) => [t.id, t]),

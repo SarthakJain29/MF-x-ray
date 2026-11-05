@@ -9,6 +9,7 @@ const NAV = [
   { href: "/app", label: "Overview", icon: "M3 12 12 4l9 8M5 10v10h14V10" },
   { href: "/app/overlap", label: "Overlap", icon: "M9 12a5 5 0 1 0 0 .01M15 12a5 5 0 1 0 0 .01" },
   { href: "/app/costs", label: "Costs", icon: "M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6" },
+  { href: "/app/tax", label: "Tax", icon: "M19 5 5 19M7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm9 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" },
   { href: "/app/goals", label: "Goals", icon: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-5a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-3.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" },
   { href: "/app/ask", label: "Ask", icon: "M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12Z" },
 ];
@@ -84,10 +85,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-line bg-bg/90 backdrop-blur-xl lg:hidden" aria-label="Main">
-        <ul className="mx-auto grid max-w-md grid-cols-5 px-2 pt-1.5">
+        <ul className="mx-auto grid max-w-md grid-cols-6 px-1 pt-1.5">
           {NAV.map((n) => (
             <li key={n.href}>
-              <Link href={n.href} className={`flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[11px] font-medium ${active(n.href) ? "text-brand" : "text-ink-3"}`} aria-current={active(n.href) ? "page" : undefined}>
+              <Link href={n.href} className={`flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10.5px] font-medium ${active(n.href) ? "text-brand" : "text-ink-3"}`} aria-current={active(n.href) ? "page" : undefined}>
                 <Icon d={n.icon} />
                 {n.label}
               </Link>
